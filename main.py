@@ -69,6 +69,7 @@ class Game:
         self.pizza_lifetime = 1000  # milliseconds
         self.pizza_objects = []
         self.GRAVITY = 25
+        self.map = Maps(self)
         self.reset()
 
     def handle_keys(self, dt):
@@ -137,7 +138,8 @@ class Game:
         if pt == PT.BOX:
             w = h = BLOCK_SIZE - 6 * BLOCK_MARGIN
             pygame.draw.rect(self.screen, PART_COLOR.get("box0"), (left, top, BLOCK_SIZE, BLOCK_SIZE))
-            pygame.draw.rect(self.screen, PART_COLOR.get("box1"), (left + 3*BLOCK_MARGIN, top + 3*BLOCK_MARGIN, w, h))
+            pygame.draw.rect(self.screen, PART_COLOR.get("box1"),
+                             (left + 3 * BLOCK_MARGIN, top + 3 * BLOCK_MARGIN, w, h))
 
         if pt == PT.PIZZA:
             pygame.draw.rect(self.screen, "red",
@@ -391,6 +393,15 @@ class Game:
             self.player_stuck[2] = True
             self.player_jump_velocity = 0
             self.player_position[1] = math.floor(self.player_position[1])
+
+            # if isinstance(part_above0, Part) and part_above0.pt in BREAKABLE_BLOCKS:
+            #     self._break_breakable(math.floor(self.player_position[0]),
+            #                           math.floor(self.player_position[1] - 1))
+            #
+            # if isinstance(part_above1, Part) and part_above1.pt in BREAKABLE_BLOCKS:
+            #     self._break_breakable(math.ceil(self.player_position[0]),
+            #                           math.floor(self.player_position[1] - 1))
+
         else:
             self.player_stuck[2] = False
 
@@ -403,7 +414,7 @@ class Game:
         self.player_jump_height = PLAYER_JUMP_H.get("normal")
         self.player_jump_velocity = 0
         self.init_floor()
-        Maps.map_0()
+        self.map.map_0()
 
     def apply_game_rules(self):
 
@@ -430,23 +441,50 @@ class Game:
 
 
 class Maps:
-    def __init__(self):
+    def __init__(self, game: Game):
         self.maps = []
+        self.game = game
 
     @staticmethod
-    def map_0():
+    def _stairs_right(start_pos: tuple[int, int], pt: PT, amount: int, length: int) -> int:
+        for i in range(amount):
+            for j in range(i + 1):
+                for k in range(length):
+                    Part(start_pos[0] + i * length + k, start_pos[1] - j, pt)
+        return amount * length
+
+    @staticmethod
+    def _stairs_left(start_pos: tuple[int, int], pt: PT, amount: int, length: int) -> int:
+        start_pos0 = start_pos[0] + amount * length -1
+        for i in range(amount):
+            for j in range(i + 1):
+                for k in range(length):
+                    Part(start_pos0 - i * length - k, start_pos[1] - j, pt)
+        return amount * length
+
+    @staticmethod
+    def _hill(start_pos: tuple[int, int], pt: PT, height: int, length: int) -> int:
+
+        stair_height = math.ceil(height / (2.0*length))
+        stair_length = math.ceil(length / (2.0*stair_height))
+        print((stair_height, stair_length))
+        x_0 = start_pos[0]
+        x_0 += Maps._stairs_right((x_0, start_pos[1]), pt, length//2, stair_length)
+        x_0 += Maps._stairs_left((x_0, start_pos[1]), pt, length//2, stair_length)
+        return length
+
+    def map_0(self):
         level_0 = H_BLOCKS - 3
-        x, y = W_BLOCKS // 2, level_0
-        for i in range(4):
-            for j in range(5):
-                Part(x + 3 + 5 * i + j, y - i, PT.BRICK)
+        x_0 = W_BLOCKS // 2
+
+        self.game.player_position[1] = level_0 - 2
 
         for i in range(4):
-            for j in range(5):
-                Part(x - 3 - 5 * i - j, y - i, PT.BOX)
+            Part(x_0 - 2 + i, level_0 - 1, PT.BOX)
+            Part(x_0 - 2 + i, level_0, PT.BOX)
 
-        Part(x + 50, y, PT.BOX)
-        Part(x + 50, y - 1, PT.BOX)
+        self._hill((x_0 + 6, level_0), PT.BRICK, 50, 10)
+        self._hill((x_0 + 18, level_0), PT.BRICK, 60, 20)
 
 
 def main():

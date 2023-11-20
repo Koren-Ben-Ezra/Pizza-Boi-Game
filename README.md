@@ -1,8 +1,10 @@
 # Pizza-Boi-Game
 
-* Basic gameplay applied
-* Collisions applied
-* Smaller character applied
+* Basic gameplay 
+* Collisions 
+* Smaller character
+* Box added
+* Pizza throw added
 
 ![image](https://github.com/Koren-Ben-Ezra/Pizza-Boi-Game/assets/109624775/bb6fd9e2-0333-487f-971b-20471303883f)
 

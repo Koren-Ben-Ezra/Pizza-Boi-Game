@@ -249,8 +249,8 @@ class Game:
     def jump(self):
         part_below_1 = all_parts.get((math.floor(self.player_position[0]), self.player_position[1] + 1))
         part_below_2 = all_parts.get((math.ceil(self.player_position[0]), self.player_position[1] + 1))
-        if (isinstance(part_below_1, Part) and part_below_1.pt == PT.BRICK) or \
-                (isinstance(part_below_2, Part) and part_below_2.pt == PT.BRICK):
+        if (isinstance(part_below_1, Part) and part_below_1.pt in BLOCK_PARTS) or \
+                (isinstance(part_below_2, Part) and part_below_2.pt in BLOCK_PARTS):
             self.player_jump_velocity = - (2 * self.GRAVITY * self.player_jump_height) ** 0.5
 
     def update_pizzas_position(self, dt):
